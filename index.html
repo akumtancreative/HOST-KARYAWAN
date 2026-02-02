@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment Report Generator</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <div class="header-title">
+                    <h1>Assessment Report Generator</h1>
+                    <p>Kelola data penilaian karyawan dengan mudah</p>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="card">
+                <div class="card__body">
+                    <form id="assessmentForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="sector" class="form-label">Sektor</label>
+                                <select id="sector" class="form-control" required>
+                                    <option value="">Pilih Sektor</option>
+                                    <option value="katapang">Katapang</option>
+                                    <option value="margahayu">Margahayu</option>
+                                    <option value="soreang">Soreang</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="assessmentName" class="form-label">Nama Penilaian</label>
+                                <input type="text" id="assessmentName" class="form-control" placeholder="Contoh: Penilaian Bulanan Januari 2024" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="period" class="form-label">Periode</label>
+                                <input type="text" id="period" class="form-control" placeholder="Contoh: Januari 2024" required>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card__body">
+                    <div class="employees-header">
+                        <div>
+                            <h2>Data Karyawan</h2>
+                            <p class="employees-count">Total: <span id="employeeCount">0</span> karyawan</p>
+                        </div>
+                        <div class="employees-actions">
+                            <button id="addEmployeeBtn" class="btn btn--primary btn-with-icon">
+                                <i data-lucide="user-plus"></i>
+                                <span>Tambah Karyawan</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <div id="emptyState" class="empty-state">
+                            <div class="empty-state-icon">
+                                <i data-lucide="users"></i>
+                            </div>
+                            <h3>Belum ada data karyawan</h3>
+                            <p>Pilih sektor dan tambahkan karyawan untuk memulai</p>
+                        </div>
+
+                        <table id="employeesTable" class="employees-table hidden">
+                            <thead>
+                                <tr>
+                                    <th style="width: 180px;">Nama</th>
+                                    <th style="width: 70px;">K/P</th>
+                                    <th style="width: 80px;">Kursus</th>
+                                    <th style="width: 80px;">Kontrol</th>
+                                    <th style="width: 80px;">Kontak</th>
+                                    <th style="width: 80px;">Lap Guru</th>
+                                    <th style="width: 70px;">HS</th>
+                                    <th style="width: 70px;">JM</th>
+                                    <th style="width: 70px;">SPP</th>
+                                    <th style="width: 90px;">Buletin Cetak</th>
+                                    <th style="width: 90px;">Buletin Digital</th>
+                                    <th style="width: 80px;">Kajian</th>
+                                    <th style="width: 80px;">Khutbah</th>
+                                    <th style="width: 80px;">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="employeesTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button id="saveTemplateBtn" class="btn btn--secondary btn-with-icon">
+                    <i data-lucide="save"></i>
+                    <span>Simpan Template</span>
+                </button>
+                <button id="loadTemplateBtn" class="btn btn--secondary btn-with-icon">
+                    <i data-lucide="folder-open"></i>
+                    <span>Muat Template</span>
+                </button>
+                <button id="clearAllBtn" class="btn btn--outline btn-with-icon">
+                    <i data-lucide="trash-2"></i>
+                    <span>Hapus Semua</span>
+                </button>
+                <button id="generateExcelBtn" class="btn btn--primary btn-with-icon">
+                    <i data-lucide="file-spreadsheet"></i>
+                    <span>Generate Excel</span>
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Template Modal -->
+    <div id="templateModal" class="modal hidden">
+        <div class="modal-overlay" id="modalOverlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Template Tersimpan</h3>
+                <button id="modalClose" class="modal-close">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="templateList" class="template-list"></div>
+            </div>
+            <div class="modal-footer">
+                <button id="modalCancel" class="btn btn--outline">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Dialog -->
+    <div id="confirmDialog" class="modal modal-content--sm hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content modal-content--sm">
+            <div class="modal-header">
+                <h3 id="confirmTitle">Konfirmasi</h3>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button id="confirmCancel" class="btn btn--outline">Batal</button>
+                <button id="confirmOk" class="btn btn--primary">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Memproses...</p>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden">
+        <div class="toast-content">
+            <i data-lucide="check-circle" class="toast-icon"></i>
+            <span id="toastMessage" class="toast-message"></span>
+        </div>
+        <button id="toastClose" class="toast-close">
+            <i data-lucide="x"></i>
+        </button>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
